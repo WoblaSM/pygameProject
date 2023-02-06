@@ -1,0 +1,147 @@
+import pygame
+import settings
+import time
+from player import Player
+from sprite_objects import *
+from ray_casting import ray_casting
+from drawing import Drawing
+import sys
+import os
+
+pygame.init()
+sc = pygame.display.set_mode((WIDTH, HEIGHT))
+sc_map = pygame.Surface((WIDTH // MAP_SCALE, HEIGHT // MAP_SCALE))
+
+sprites = Sprites()
+clock = pygame.time.Clock()
+player = Player()
+drawing = Drawing(sc, sc_map)
+
+def load_image(name, colorkey=None):
+    fullname = name
+    if not os.path.isfile(fullname):
+        print(f"Файл с изображением '{fullname}' не найден")
+        sys.exit()
+    image = pygame.image.load(fullname)
+    if colorkey is not None:
+        image = image.convert()
+        if colorkey == -1:
+            colorkey = image.get_at((0, 0))
+        image.set_colorkey(colorkey)
+    else:
+        image = image.convert_alpha()
+    return image
+
+def start_screen():
+    clock = pygame.time.Clock()
+    intro_text = ["чтобы начать нажмите ПКМ",
+                  "Правила игры:",
+                  "чтобы выйграть соберите 10 пельмений и сбегите,",
+                  "а также недайте демону съесть вас."]
+
+    fon = pygame.transform.scale(load_image('img/start_fon.png'), (1200, 600))
+    sc.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('white'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        sc.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+            elif event.type == pygame.KEYDOWN or \
+                    event.type == pygame.MOUSEBUTTONDOWN:
+                return
+        pygame.display.flip()
+        clock.tick(FPS)
+
+def end_screen():
+    clock = pygame.time.Clock()
+    intro_text = ["ПОБЕДА", "",
+                  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+                  "   ",
+                  "   "]
+
+
+
+    fon = pygame.transform.scale(load_image('img/fin2_fon.png'), (1200, 600))
+    sc.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('white'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        sc.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+def end_screen2():
+    clock = pygame.time.Clock()
+    intro_text = ["вас съела фрикоделька(", "",
+                  "score: " + str(settings.score),
+                  "   ",
+                  "   "]
+    fon = pygame.transform.scale(load_image('img/fin_fon.png'), (1200, 600))
+    sc.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('white'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 10
+        text_coord += intro_rect.height
+        sc.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
+start_screen()
+def game():
+    while True:
+        if settings.exit_d:
+            end_screen()
+            break
+        elif not settings.live:
+            end_screen2()
+            break
+        #score += 1
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+        player.movement()
+        sc.fill(BLACK)
+
+        drawing.background(player.angle)
+        walls = ray_casting(player, drawing.textures)
+        drawing.world(walls + [obj.object_locate(player, walls) for obj in sprites.list_of_objects])
+        drawing.fps(settings.score)
+
+
+        pygame.display.flip()
+        clock.tick()
+
+game()
