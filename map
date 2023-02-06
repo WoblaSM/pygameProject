@@ -1,0 +1,37 @@
+from settings import *
+import pygame
+
+text_map = [
+    '111444441122114441122141',
+    '1.....2...........2....1',
+    '4.22.....2........2....4',
+    '4..........41.....4....4',
+    '1.22.......11.....4....1',
+    '1.2......2.............1',
+    '4.....4....41..........1',
+    '441.....1111444224411.11',
+    '1.....2...........2....1',
+    '4.22.....2........4.41.1',
+    '1....41...41.....2....14',
+    '4.22.......14.....241..1',
+    '1.2......2........4....1',
+    '1.....2....14.....2..411',
+    '1E1111444441111444111111'
+]
+collision_walls = []
+world_map = {}
+mini_map = set()
+for j, row in enumerate(text_map):
+    for i, char in enumerate(row):
+        if char != '.':
+            mini_map.add((i * MAP_TILE, j * MAP_TILE))
+            collision_walls.append(pygame.Rect(i * TILE, j * TILE, TILE, TILE))
+            if char == '1':
+                world_map[(i * TILE, j * TILE)] = '1'
+            elif char == '2':
+                world_map[(i * TILE, j * TILE)] = '2'
+            elif char == '4':
+                world_map[(i * TILE, j * TILE)] = '4'
+            elif char == 'E':
+                world_map[(i * TILE, j * TILE)] = 'E'
+
